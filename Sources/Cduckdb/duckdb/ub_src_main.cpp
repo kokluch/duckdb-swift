@@ -64,8 +64,17 @@
 #line 0 "src/main/extension_manager.cpp"
 #include "src/main/extension_manager.cpp"
 
+#line 0 "src/main/external_resource_type_registry.cpp"
+#include "src/main/external_resource_type_registry.cpp"
+
+#line 0 "src/main/external_resources_manager.cpp"
+#include "src/main/external_resources_manager.cpp"
+
 #line 0 "src/main/materialized_query_result.cpp"
 #include "src/main/materialized_query_result.cpp"
+
+#line 0 "src/main/parse_iterator.cpp"
+#include "src/main/parse_iterator.cpp"
 
 #line 0 "src/main/pending_query_result.cpp"
 #include "src/main/pending_query_result.cpp"
@@ -87,6 +96,9 @@
 
 #line 0 "src/main/result_set_manager.cpp"
 #include "src/main/result_set_manager.cpp"
+
+#line 0 "src/main/statement_iterator.cpp"
+#include "src/main/statement_iterator.cpp"
 
 #line 0 "src/main/stream_query_result.cpp"
 #include "src/main/stream_query_result.cpp"

@@ -1,3 +1,6 @@
+#line 0 "src/function/table/system/create_external_resource.cpp"
+#include "src/function/table/system/create_external_resource.cpp"
+
 #line 0 "src/function/table/system/duckdb_approx_database_count.cpp"
 #include "src/function/table/system/duckdb_approx_database_count.cpp"
 
@@ -93,6 +96,12 @@
 
 #line 0 "src/function/table/system/enable_profiling.cpp"
 #include "src/function/table/system/enable_profiling.cpp"
+
+#line 0 "src/function/table/system/external_resource_types.cpp"
+#include "src/function/table/system/external_resource_types.cpp"
+
+#line 0 "src/function/table/system/external_resources.cpp"
+#include "src/function/table/system/external_resources.cpp"
 
 #line 0 "src/function/table/system/logging_utils.cpp"
 #include "src/function/table/system/logging_utils.cpp"

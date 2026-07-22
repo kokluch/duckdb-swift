@@ -88,7 +88,7 @@ static idx_t GetUnsignedMinMaxDistinctCount(const BaseStatistics &base_stats, id
 static idx_t GetBooleanMinMaxDistinctCount(const BaseStatistics &base_stats, idx_t base_table_cardinality) {
 	auto min_value = NumericStats::Min(base_stats).GetValueUnsafe<bool>();
 	auto max_value = NumericStats::Max(base_stats).GetValueUnsafe<bool>();
-	auto distinct_count = min_value == max_value ? 1 : 2;
+	idx_t distinct_count = min_value == max_value ? idx_t(1) : idx_t(2);
 	return CapMinMaxDistinctCount(distinct_count, base_table_cardinality);
 }
 
@@ -409,6 +409,21 @@ RelationStats RelationStatisticsHelper::CombineStatsOfNonReorderableOperator(Log
 	case LogicalOperatorType::LOGICAL_EXCEPT: {
 		D_ASSERT(child_stats.size() == 2);
 		ret.cardinality = child_cardinalities[0];
+		break;
+	}
+	case LogicalOperatorType::LOGICAL_ASOF_JOIN: {
+		D_ASSERT(child_stats.size() == 2);
+		auto &join = op.Cast<LogicalComparisonJoin>();
+		switch (join.join_type) {
+		case JoinType::RIGHT:
+		case JoinType::OUTER:
+			ret.cardinality = child_cardinalities[1];
+			break;
+		default:
+			//	ASOF Joins are usually a table lookup that produce single matches for the LHS
+			ret.cardinality = child_cardinalities[0];
+			break;
+		}
 		break;
 	}
 	default:

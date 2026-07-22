@@ -31,9 +31,6 @@
 #line 0 "src/common/column_index.cpp"
 #include "src/common/column_index.cpp"
 
-#line 0 "src/common/complex_json.cpp"
-#include "src/common/complex_json.cpp"
-
 #line 0 "src/common/compressed_file_system.cpp"
 #include "src/common/compressed_file_system.cpp"
 
@@ -91,6 +88,9 @@
 #line 0 "src/common/identifier.cpp"
 #include "src/common/identifier.cpp"
 
+#line 0 "src/common/json_document.cpp"
+#include "src/common/json_document.cpp"
+
 #line 0 "src/common/local_file_system.cpp"
 #include "src/common/local_file_system.cpp"
 
@@ -99,6 +99,9 @@
 
 #line 0 "src/common/opener_file_system.cpp"
 #include "src/common/opener_file_system.cpp"
+
+#line 0 "src/common/optional_idx.cpp"
+#include "src/common/optional_idx.cpp"
 
 #line 0 "src/common/path.cpp"
 #include "src/common/path.cpp"
@@ -132,6 +135,9 @@
 
 #line 0 "src/common/thread_util.cpp"
 #include "src/common/thread_util.cpp"
+
+#line 0 "src/common/time_point.cpp"
+#include "src/common/time_point.cpp"
 
 #line 0 "src/common/tree_renderer.cpp"
 #include "src/common/tree_renderer.cpp"

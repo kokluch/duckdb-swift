@@ -10,6 +10,9 @@
 #line 0 "src/parser/peg/matcher.cpp"
 #include "src/parser/peg/matcher.cpp"
 
+#line 0 "src/parser/peg/parser_packrat.cpp"
+#include "src/parser/peg/parser_packrat.cpp"
+
 #line 0 "src/parser/peg/peg_parser.cpp"
 #include "src/parser/peg/peg_parser.cpp"
 

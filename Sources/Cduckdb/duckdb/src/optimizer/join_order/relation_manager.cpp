@@ -134,6 +134,11 @@ static bool OperatorIsNonReorderable(LogicalOperatorType op_type) {
 	case LogicalOperatorType::LOGICAL_INTERSECT:
 	case LogicalOperatorType::LOGICAL_ANY_JOIN:
 	case LogicalOperatorType::LOGICAL_ASOF_JOIN:
+	// DML operators have side effects and must never be reordered away or passed through (a correlated
+	// trigger body can place an INSERT/UPDATE/DELETE mid-plan, as a cross-product child for example).
+	case LogicalOperatorType::LOGICAL_INSERT:
+	case LogicalOperatorType::LOGICAL_UPDATE:
+	case LogicalOperatorType::LOGICAL_DELETE:
 		return true;
 	default:
 		return false;
@@ -173,6 +178,7 @@ static void PinFilterAfterLeftJoin(FilterInfo &filter, JoinRelationSet &nullable
                                    JoinRelationSetManager &set_manager) {
 	if (RelationSetsIntersect(filter.set.get(), nullable_set)) {
 		filter.set = set_manager.Union(filter.set.get(), left_join_set);
+		filter.must_remain_filter |= filter.from_logical_filter;
 	}
 	if (filter.left_set && RelationSetsIntersect(*filter.left_set, nullable_set)) {
 		filter.left_set = &set_manager.Union(*filter.left_set, left_join_set);
@@ -265,8 +271,9 @@ bool RelationManager::ExtractJoinRelations(JoinOrderOptimizer &optimizer, Logica
 	optional_ptr<LogicalOperator> op = &input_op;
 	vector<reference<LogicalOperator>> datasource_filters;
 	optional_ptr<LogicalOperator> limit_op = nullptr;
-	// pass through single child operators
-	while (op->children.size() == 1 && !OperatorNeedsRelation(op->type)) {
+	// pass through single child operators (but never past a non-reorderable op such as a DML node, which
+	// must be preserved as its own relation rather than skipped over and dropped during reconstruction)
+	while (op->children.size() == 1 && !OperatorNeedsRelation(op->type) && !OperatorIsNonReorderable(op->type)) {
 		if (op->type == LogicalOperatorType::LOGICAL_FILTER) {
 			if (HasNonReorderableChild(*op)) {
 				datasource_filters.push_back(*op);
@@ -762,6 +769,7 @@ vector<unique_ptr<FilterInfo>> RelationManager::ExtractEdges(LogicalOperator &op
 				break;
 			}
 			case JoinType::LEFT: {
+				auto filter_count_before_left_join = filters_and_bindings.size();
 				// For LEFT joins, create one FilterInfo per comparison condition.
 				// Each uses the full left/right relation sets from the comparison conditions
 				// to preserve join-ordering constraints, but individual column bindings so that
@@ -839,11 +847,9 @@ vector<unique_ptr<FilterInfo>> RelationManager::ExtractEdges(LogicalOperator &op
 					// after the LEFT join has introduced NULL-extended rows. Pin them to the full LEFT
 					// join output, otherwise reconstruction can push null-aware predicates like
 					// "lhs IS DISTINCT FROM rhs" below the LEFT join and turn them into inner filters.
-					for (auto &filter : filters_and_bindings) {
-						if (filter->join_type == JoinType::LEFT) {
-							continue;
-						}
-						PinFilterAfterLeftJoin(*filter, *full_right_set, full_set, set_manager);
+					for (idx_t filter_idx = 0; filter_idx < filter_count_before_left_join; filter_idx++) {
+						PinFilterAfterLeftJoin(*filters_and_bindings[filter_idx], *full_right_set, full_set,
+						                       set_manager);
 					}
 				}
 
@@ -917,6 +923,7 @@ vector<unique_ptr<FilterInfo>> RelationManager::ExtractEdges(LogicalOperator &op
 					}
 					auto &set = set_manager.GetJoinRelation(bindings);
 					auto filter_info = make_uniq<FilterInfo>(std::move(expression), set, filters_and_bindings.size());
+					filter_info->from_logical_filter = true;
 					filters_and_bindings.push_back(std::move(filter_info));
 				}
 			}

@@ -28,6 +28,9 @@
 #line 0 "extension/json/json_functions/json_merge_patch_diff.cpp"
 #include "extension/json/json_functions/json_merge_patch_diff.cpp"
 
+#line 0 "extension/json/json_functions/json_modify.cpp"
+#include "extension/json/json_functions/json_modify.cpp"
+
 #line 0 "extension/json/json_functions/json_normalize.cpp"
 #include "extension/json/json_functions/json_normalize.cpp"
 

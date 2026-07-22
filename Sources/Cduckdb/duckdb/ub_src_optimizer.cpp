@@ -106,6 +106,9 @@
 #line 0 "src/optimizer/sampling_pushdown.cpp"
 #include "src/optimizer/sampling_pushdown.cpp"
 
+#line 0 "src/optimizer/scalar_fn_pushdown.cpp"
+#include "src/optimizer/scalar_fn_pushdown.cpp"
+
 #line 0 "src/optimizer/statistics_propagator.cpp"
 #include "src/optimizer/statistics_propagator.cpp"
 
@@ -114,6 +117,9 @@
 
 #line 0 "src/optimizer/topn_window_elimination.cpp"
 #include "src/optimizer/topn_window_elimination.cpp"
+
+#line 0 "src/optimizer/type_pushdown.cpp"
+#include "src/optimizer/type_pushdown.cpp"
 
 #line 0 "src/optimizer/unnest_rewriter.cpp"
 #include "src/optimizer/unnest_rewriter.cpp"

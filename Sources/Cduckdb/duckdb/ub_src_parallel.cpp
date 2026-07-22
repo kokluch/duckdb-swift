@@ -22,6 +22,9 @@
 #line 0 "src/parallel/pipeline.cpp"
 #include "src/parallel/pipeline.cpp"
 
+#line 0 "src/parallel/pipeline_broadcast_exchange.cpp"
+#include "src/parallel/pipeline_broadcast_exchange.cpp"
+
 #line 0 "src/parallel/pipeline_complete_event.cpp"
 #include "src/parallel/pipeline_complete_event.cpp"
 

@@ -258,6 +258,17 @@ struct AllowedPathsSetting {
 	static Value GetSetting(const ClientContext &context);
 };
 
+struct ApproximateJoinOrderThresholdSetting {
+	using RETURN_TYPE = idx_t;
+	static constexpr const char *Name = "approximate_join_order_threshold";
+	static constexpr const char *Description =
+	    "The minimum number of tables in a join to determine the optimal join order approximately instead of exactly.";
+	static constexpr const char *InputType = "UBIGINT";
+	static constexpr const char *DefaultValue = "12";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::LOCAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+};
+
 struct ArrowLargeBufferSizeSetting {
 	using RETURN_TYPE = bool;
 	static constexpr const char *Name = "arrow_large_buffer_size";
@@ -531,6 +542,28 @@ struct DebugEvictionQueueSleepMicroSecondsSetting {
 	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
 };
 
+struct DebugForceCommitFailureSetting {
+	using RETURN_TYPE = bool;
+	static constexpr const char *Name = "debug_force_commit_failure";
+	static constexpr const char *Description = "DEBUG SETTING: force transaction commit to fail after the undo buffer "
+	                                           "has been committed, used for testing commit error recovery";
+	static constexpr const char *InputType = "BOOLEAN";
+	static constexpr const char *DefaultValue = "false";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::GLOBAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+};
+
+struct DebugForceCommitRevertFailureSetting {
+	using RETURN_TYPE = bool;
+	static constexpr const char *Name = "debug_force_commit_revert_failure";
+	static constexpr const char *Description =
+	    "DEBUG SETTING: force RevertCommit to fail while recovering from a commit failure, used for testing";
+	static constexpr const char *InputType = "BOOLEAN";
+	static constexpr const char *DefaultValue = "false";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::GLOBAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+};
+
 struct DebugForceExternalSetting {
 	using RETURN_TYPE = bool;
 	static constexpr const char *Name = "debug_force_external";
@@ -593,6 +626,16 @@ struct DebugSkipCheckpointOnCommitSetting {
 	static constexpr const char *InputType = "BOOLEAN";
 	static constexpr const char *DefaultValue = "false";
 	static constexpr SettingScopeTarget Scope = SettingScopeTarget::GLOBAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+};
+
+struct DebugTransformerTrampolineStyleSetting {
+	using RETURN_TYPE = bool;
+	static constexpr const char *Name = "debug_transformer_trampoline_style";
+	static constexpr const char *Description = "Use the experimental trampoline-style parser transformer";
+	static constexpr const char *InputType = "BOOLEAN";
+	static constexpr const char *DefaultValue = "false";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::LOCAL_DEFAULT;
 	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
 };
 
@@ -787,7 +830,7 @@ struct DelimJoinAsCteSetting {
 	static constexpr const char *Description =
 	    "Rewrite delim joins to materialized CTEs during dependent join flattening";
 	static constexpr const char *InputType = "BOOLEAN";
-	static constexpr const char *DefaultValue = "false";
+	static constexpr const char *DefaultValue = "true";
 	static constexpr SettingScopeTarget Scope = SettingScopeTarget::LOCAL_DEFAULT;
 	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
 };
@@ -1748,6 +1791,30 @@ struct ProgressBarTimeSetting {
 	static Value GetSetting(const ClientContext &context);
 };
 
+struct ReadAheadDepthSetting {
+	using RETURN_TYPE = int64_t;
+	static constexpr const char *Name = "read_ahead_depth";
+	static constexpr const char *Description = "Number of scan jobs the multi-file reader prefetches ahead of "
+	                                           "decoding. -1 = automatic (based on thread count), 0 = disabled.";
+	static constexpr const char *InputType = "BIGINT";
+	static constexpr const char *DefaultValue = "-1";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::GLOBAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+	static void OnSet(SettingCallbackInfo &info, Value &input);
+};
+
+struct RegexMatchOperatorSemanticsSetting {
+	using RETURN_TYPE = RegexMatchOperatorSemantics;
+	static constexpr const char *Name = "regex_match_operator_semantics";
+	static constexpr const char *Description =
+	    "Configures whether regex match operators use partial or full string matching";
+	static constexpr const char *InputType = "VARCHAR";
+	static constexpr const char *DefaultValue = "partial";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::LOCAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+	static void OnSet(SettingCallbackInfo &info, Value &input);
+};
+
 struct ScalarSubqueryErrorOnMultipleRowsSetting {
 	using RETURN_TYPE = bool;
 	static constexpr const char *Name = "scalar_subquery_error_on_multiple_rows";
@@ -1846,6 +1913,18 @@ struct StreamingBufferSizeSetting {
 	static void SetLocal(ClientContext &context, const Value &parameter);
 	static void ResetLocal(ClientContext &context);
 	static Value GetSetting(const ClientContext &context);
+};
+
+struct TableFunctionIdentifierConversionSetting {
+	using RETURN_TYPE = TableFunctionIdentifierConversion;
+	static constexpr const char *Name = "table_function_identifier_conversion";
+	static constexpr const char *Description = "Configures the use of deprecated implicit conversion of unbound "
+	                                           "identifiers to strings in table function arguments.";
+	static constexpr const char *InputType = "VARCHAR";
+	static constexpr const char *DefaultValue = "DEFAULT";
+	static constexpr SettingScopeTarget Scope = SettingScopeTarget::LOCAL_DEFAULT;
+	static constexpr idx_t SettingIndex = NEXT_SETTING_INDEX();
+	static void OnSet(SettingCallbackInfo &info, Value &input);
 };
 
 struct TempDirectorySetting {

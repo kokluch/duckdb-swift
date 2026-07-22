@@ -52,3 +52,6 @@
 #line 0 "src/storage/serialization/serialize_types.cpp"
 #include "src/storage/serialization/serialize_types.cpp"
 
+#line 0 "src/storage/serialization/serialize_wal.cpp"
+#include "src/storage/serialization/serialize_wal.cpp"
+

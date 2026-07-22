@@ -4,6 +4,9 @@
 #line 0 "extension/core_functions/aggregate/holistic/approximate_quantile.cpp"
 #include "extension/core_functions/aggregate/holistic/approximate_quantile.cpp"
 
+#line 0 "extension/core_functions/aggregate/holistic/lttb.cpp"
+#include "extension/core_functions/aggregate/holistic/lttb.cpp"
+
 #line 0 "extension/core_functions/aggregate/holistic/mad.cpp"
 #include "extension/core_functions/aggregate/holistic/mad.cpp"
 

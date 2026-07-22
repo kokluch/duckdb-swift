@@ -80,6 +80,7 @@ static const ConfigurationOption internal_options[] = {
     DUCKDB_GLOBAL(AllowedConfigsSetting),
     DUCKDB_GLOBAL(AllowedDirectoriesSetting),
     DUCKDB_GLOBAL(AllowedPathsSetting),
+    DUCKDB_SETTING(ApproximateJoinOrderThresholdSetting),
     DUCKDB_SETTING(ArrowLargeBufferSizeSetting),
     DUCKDB_SETTING(ArrowLosslessConversionSetting),
     DUCKDB_SETTING(ArrowOutputListViewSetting),
@@ -104,12 +105,15 @@ static const ConfigurationOption internal_options[] = {
     DUCKDB_SETTING(DebugCheckpointSleepMsSetting),
     DUCKDB_SETTING(DebugDisableOptimizerSetting),
     DUCKDB_SETTING(DebugEvictionQueueSleepMicroSecondsSetting),
+    DUCKDB_SETTING(DebugForceCommitFailureSetting),
+    DUCKDB_SETTING(DebugForceCommitRevertFailureSetting),
     DUCKDB_SETTING(DebugForceExternalSetting),
     DUCKDB_SETTING(DebugForceFetchRowSetting),
     DUCKDB_SETTING(DebugForceNoCrossProductSetting),
     DUCKDB_GLOBAL(DebugOrderVerificationSetting),
     DUCKDB_SETTING_CALLBACK(DebugPhysicalTableScanExecutionStrategySetting),
     DUCKDB_SETTING(DebugSkipCheckpointOnCommitSetting),
+    DUCKDB_SETTING(DebugTransformerTrampolineStyleSetting),
     DUCKDB_GLOBAL(DebugVerificationModeSetting),
     DUCKDB_SETTING(DebugVerificationProjectionSetting),
     DUCKDB_SETTING(DebugVerifyAggregateStateExportSetting),
@@ -216,6 +220,8 @@ static const ConfigurationOption internal_options[] = {
     DUCKDB_LOCAL(ProfilingOutputSetting),
     DUCKDB_LOCAL(ProfilingRendererSettingsSetting),
     DUCKDB_LOCAL(ProgressBarTimeSetting),
+    DUCKDB_SETTING_CALLBACK(ReadAheadDepthSetting),
+    DUCKDB_SETTING_CALLBACK(RegexMatchOperatorSemanticsSetting),
     DUCKDB_SETTING(ScalarSubqueryErrorOnMultipleRowsSetting),
     DUCKDB_SETTING(SchedulerProcessPartialSetting),
     DUCKDB_LOCAL(SchemaSetting),
@@ -225,6 +231,7 @@ static const ConfigurationOption internal_options[] = {
     DUCKDB_SETTING_CALLBACK(StorageBlockPrefetchSetting),
     DUCKDB_GLOBAL(StorageCompatibilityVersionSetting),
     DUCKDB_LOCAL(StreamingBufferSizeSetting),
+    DUCKDB_SETTING_CALLBACK(TableFunctionIdentifierConversionSetting),
     DUCKDB_GLOBAL(TempDirectorySetting),
     DUCKDB_SETTING_CALLBACK(TempFileEncryptionSetting),
     DUCKDB_GLOBAL(ThreadsSetting),
@@ -240,14 +247,14 @@ static const ConfigurationOption internal_options[] = {
     DUCKDB_SETTING(ZstdMinStringLengthSetting),
     FINAL_SETTING};
 
-static const ConfigurationAlias setting_aliases[] = {DUCKDB_SETTING_ALIAS("configure_metrics", 29),
-                                                     DUCKDB_SETTING_ALIAS("custom_profiling_settings", 29),
-                                                     DUCKDB_SETTING_ALIAS("memory_limit", 124),
-                                                     DUCKDB_SETTING_ALIAS("null_order", 57),
-                                                     DUCKDB_SETTING_ALIAS("profile_output", 147),
-                                                     DUCKDB_SETTING_ALIAS("user", 163),
-                                                     DUCKDB_SETTING_ALIAS("wal_autocheckpoint", 28),
-                                                     DUCKDB_SETTING_ALIAS("worker_threads", 161),
+static const ConfigurationAlias setting_aliases[] = {DUCKDB_SETTING_ALIAS("configure_metrics", 30),
+                                                     DUCKDB_SETTING_ALIAS("custom_profiling_settings", 30),
+                                                     DUCKDB_SETTING_ALIAS("memory_limit", 128),
+                                                     DUCKDB_SETTING_ALIAS("null_order", 61),
+                                                     DUCKDB_SETTING_ALIAS("profile_output", 151),
+                                                     DUCKDB_SETTING_ALIAS("user", 170),
+                                                     DUCKDB_SETTING_ALIAS("wal_autocheckpoint", 29),
+                                                     DUCKDB_SETTING_ALIAS("worker_threads", 168),
                                                      FINAL_ALIAS};
 
 vector<ConfigurationOption> DBConfig::GetOptions() {
@@ -481,6 +488,11 @@ LogicalType DBConfig::ParseLogicalType(const string &type) {
 		return LogicalType::UNION(union_members);
 	}
 
+	if (type == "STRUCT") {
+		// empty struct
+		return LogicalType::STRUCT({});
+	}
+
 	if (StringUtil::StartsWith(type, "STRUCT(") && StringUtil::EndsWith(type, ")")) {
 		// struct - recurse
 		string struct_members_str = type.substr(7, type.size() - 8);
@@ -634,8 +646,7 @@ idx_t DBConfig::GetSystemMaxAsyncThreads(FileSystem &fs) {
 #ifdef DUCKDB_NO_THREADS
 	return 0;
 #else
-	// via benchmark, it seems that ~2x system threads is the I/O-concurrency sweet spot for remote (S3) scans
-	return 2 * GetSystemMaxThreads(fs);
+	return MinValue<idx_t>(4 * GetSystemMaxThreads(fs), 256);
 #endif
 }
 
